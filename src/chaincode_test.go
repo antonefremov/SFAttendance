@@ -11,9 +11,9 @@ func TestAttendanceCreateRead(test *testing.T) {
 	// prepare all the necessary objects and keys
 	stub := InitChaincode(test)
 	attendanceForTesting := GetAttendaceForTesting()
-	attendanceID := attendanceForTesting[0]
+	attendanceID := GetAttendanceForTestingKey()[0] //attendanceForTesting[0]
 	//attendanceForTestingAsBytes := ConvertBytesToAttendanceAsBytes(attendanceForTesting)
-	attendanceForTestingKey := [][]byte{attendanceForTesting[0]}
+	attendanceForTestingKey := GetAttendanceForTestingKey() //[][]byte{attendanceForTesting[0]}
 
 	// invoke the functions
 	Invoke(test, stub, "recordAttendance", attendanceForTesting)

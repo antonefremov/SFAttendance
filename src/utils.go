@@ -26,7 +26,7 @@ func InitChaincode(test *testing.T) *shim.MockStub {
 // Invoke wrapper
 // ============================================================================================================================
 func Invoke(test *testing.T, stub *shim.MockStub, function string, args [][]byte) []byte {
-	const transactionId = "000"
+	const transactionID = "000"
 
 	// prepend the function name as the first item
 	args = append([][]byte{[]byte(function)}, args...)
@@ -39,7 +39,7 @@ func Invoke(test *testing.T, stub *shim.MockStub, function string, args [][]byte
 	fmt.Println("Call:    ", function, "(", string(byteArrayToPrint), ")")
 
 	// perform the MockInvoke call
-	result := stub.MockInvoke(transactionId, args)
+	result := stub.MockInvoke(transactionID, args)
 
 	// print the Invoke results
 	fmt.Println("RetCode: ", result.Status)
@@ -59,10 +59,14 @@ func Invoke(test *testing.T, stub *shim.MockStub, function string, args [][]byte
 // ============================================================================================================================
 func GetAttendaceForTesting() [][]byte {
 	return [][]byte{
-		[]byte("I300455BC4308531"), // ID
-		[]byte("I300455"),          // ParticipantID
-		[]byte("BC430"),            // SessionID
-		[]byte("8531")}             // SessionCode
+		// []byte("I300455BC4308531"), // ID
+		[]byte("I300455"), // ParticipantID
+		[]byte("BC430"),   // SessionID
+		[]byte("8531")}    // SessionCode
+}
+
+func GetAttendanceForTestingKey() [][]byte {
+	return [][]byte{[]byte("I300455BC4308531")}
 }
 
 // ============================================================================================================================

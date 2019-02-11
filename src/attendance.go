@@ -26,16 +26,19 @@ type Attendance struct {
 func recordAttendance(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	var err error
 
-	if len(args) != 4 {
-		return shim.Error("Incorrect number of arguments. Expecting exactly 4 arguments")
+	if len(args) != 3 {
+		return shim.Error("Incorrect number of arguments. Expecting exactly 3 arguments")
 	}
 
 	var attendance Attendance
-	attendance.ParticipantID = args[1]
-	attendance.SessionID = args[2]
-	attendance.SessionCode = args[3]
-	// compositeKey := []string{args[1], args[2], args[3]}
-	// attendance.ID, _ = stub.CreateCompositeKey("", compositeKey) //args[0] //attendance.ParticipantID + attendance.SessionID + attendance.SessionCode
+	attendance.ParticipantID = args[0]
+	attendance.SessionID = args[1]
+	attendance.SessionCode = args[2]
+	// compositeKey :=
+	// attendance.ID, _ = stub.CreateCompositeKey("", []string{args[0], args[1], args[2]}) //args[0] //attendance.ParticipantID + attendance.SessionID + attendance.SessionCode
+	// if err != nil {
+	// 	fmt.Println("The was an error creating a composite key", err)
+	// }
 	attendance.ID = attendance.ParticipantID + attendance.SessionID + attendance.SessionCode
 	fmt.Println("The composite key created is", attendance.ID)
 	// attendance.Confirmation = ""
@@ -67,6 +70,7 @@ func verifyAttendance(stub shim.ChaincodeStubInterface, args []string) peer.Resp
 		return shim.Error("Incorrect number of arguments. Expecting exactly 1 argument")
 	}
 	var id = args[0] //+ args[1] + args[2]
+	// fmt.Println("===== id = ", id)
 
 	existingAttendance, _ := getAttendance(stub, id)
 	if len(existingAttendance.ID) > 0 {
