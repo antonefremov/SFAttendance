@@ -3,8 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
-
-	"fmt"
+	"time"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/hyperledger/fabric/protos/peer"
@@ -12,10 +11,13 @@ import (
 
 // The Attendance structure
 type Attendance struct {
-	ID            string `json:"Id"`            // Id
-	ParticipantID string `json:"participantId"` // Participant Id
-	SessionID     string `json:"sessionId"`     // Session Id
-	SessionCode   string `json:"sessionCode"`   // Session Code
+	ID                           string    `json:"Id"`                           // Id
+	Cust_attendance_externalCode string    `json:"cust_attendance_externalCode"` // First part of the key
+	ExternalCode                 string    `json:"externalCode"`                 // Second part of the key
+	Cust_session_id              string    `json:"cust_session_id"`              // Cust Session Id
+	Cust_session_code            string    `json:"cust_session_code"`            // Cust Session Code
+	LastModifiedBy               string    `json:"lastModifiedBy"`               // Last Modified By (Participant)
+	LastModifiedDateTime         time.Time `json:"lastModifiedDateTime"`         // Last Modified Time
 	// DateTime	  string ???
 	// Confirmation string `json:"confirmation"` // Confirmation response sent as a bar code or a url link ???
 }
@@ -26,36 +28,27 @@ type Attendance struct {
 func recordAttendance(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	var err error
 
-	if len(args) != 3 {
-		return shim.Error("Incorrect number of arguments. Expecting exactly 3 arguments")
+	if len(args) != 5 {
+		return shim.Error("Incorrect number of arguments. Expecting exactly 5 arguments")
 	}
 
 	var attendance Attendance
-	attendance.ParticipantID = args[0]
-	attendance.SessionID = args[1]
-	attendance.SessionCode = args[2]
-	// compositeKey :=
-	// attendance.ID, _ = stub.CreateCompositeKey("", []string{args[0], args[1], args[2]}) //args[0] //attendance.ParticipantID + attendance.SessionID + attendance.SessionCode
-	// if err != nil {
-	// 	fmt.Println("The was an error creating a composite key", err)
-	// }
-	attendance.ID = attendance.ParticipantID + attendance.SessionID + attendance.SessionCode
-	fmt.Println("The composite key created is", attendance.ID)
-	// attendance.Confirmation = ""
+	attendance.Cust_attendance_externalCode = args[0]
+	attendance.ExternalCode = args[1]
+	attendance.Cust_session_id = args[2]
+	attendance.Cust_session_code = args[3]
+	attendance.LastModifiedBy = args[4]
+	attendance.LastModifiedDateTime = time.Now()
+	attendance.ID = stub.GetTxID() // attendance.Cust_attendance_externalCode + attendance.ExternalCode
 
 	existingAttendance, _ := getAttendance(stub, attendance.ID)
 	if len(existingAttendance.ID) > 0 {
 		return shim.Error("Attendance already exists!")
 	}
 
-	// if owner.Id == "" && err != nil {
-	// 	return shim.Error("Owner does not exist with Id '" + asset.OwnerId + "'")
-	// }
-
 	attendanceAsBytes, _ := json.Marshal(attendance)
 	err = stub.PutState(attendance.ID, attendanceAsBytes)
 	if err != nil {
-		// fmt.Println("Could not save an Attendance")
 		return shim.Error(err.Error())
 	}
 
@@ -63,21 +56,37 @@ func recordAttendance(stub shim.ChaincodeStubInterface, args []string) peer.Resp
 }
 
 // ============================================================================================================================
-// Verify Attendance - return verification on Attendance existence
+// Verify Attendance - return Attendance Id as verification of its existence
 // ============================================================================================================================
 func verifyAttendance(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	if len(args) != 1 {
 		return shim.Error("Incorrect number of arguments. Expecting exactly 1 argument")
 	}
-	var id = args[0] //+ args[1] + args[2]
-	// fmt.Println("===== id = ", id)
+	var id = args[0]
 
 	existingAttendance, _ := getAttendance(stub, id)
 	if len(existingAttendance.ID) > 0 {
 		return shim.Success([]byte(existingAttendance.ID))
 	}
 
-	return shim.Error("Attendance does not exist with Id = " + id)
+	return shim.Error("Attendance does not exist with TrId = " + id)
+}
+
+// ============================================================================================================================
+// Read Attendance - return Attendance as sequence of bytes
+// ============================================================================================================================
+func readAttendance(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	if len(args) != 1 {
+		return shim.Error("Incorrect number of arguments. Expecting exactly 1 argument")
+	}
+	var id = args[0]
+
+	attendanceAsBytes, err := stub.GetState(id)
+	if err != nil {
+		return shim.Error("{\"Error\":\"Failed to get state for Attendance with TrId " + id + "\"}")
+	}
+
+	return shim.Success(attendanceAsBytes)
 }
 
 // ============================================================================================================================
@@ -85,13 +94,11 @@ func verifyAttendance(stub shim.ChaincodeStubInterface, args []string) peer.Resp
 // ============================================================================================================================
 func getAttendance(stub shim.ChaincodeStubInterface, id string) (Attendance, error) {
 	var attendance Attendance
-	// fmt.Println("The key inside the getAttendace is", id)
+
 	attendanceAsBytes, err := stub.GetState(id)
 	if err != nil {
 		return attendance, err
 	}
-
-	// fmt.Println("Attendance as bytes is ", attendanceAsBytes)
 
 	json.Unmarshal(attendanceAsBytes, &attendance)
 	if len(attendance.ID) == 0 {

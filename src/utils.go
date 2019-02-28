@@ -54,19 +54,20 @@ func Invoke(test *testing.T, stub *shim.MockStub, function string, args [][]byte
 	return []byte(result.Payload)
 }
 
-// ============================================================================================================================
-// Get a mock Attendance
-// ============================================================================================================================
+// GetAttendaceForTesting Get a mock Attendance
 func GetAttendaceForTesting() [][]byte {
 	return [][]byte{
 		// []byte("I300455BC4308531"), // ID
-		[]byte("I300455"), // ParticipantID
-		[]byte("BC430"),   // SessionID
-		[]byte("8531")}    // SessionCode
+		[]byte("sfadmin"),  // Cust_attendance_externalCode
+		[]byte("358801"),   // ExternalCode
+		[]byte("001"),      // Cust_session_id
+		[]byte("abcd1234"), // Cust_session_code
+		[]byte("sfadmin")}  // LastModifiedBy
 }
 
-func GetAttendanceForTestingKey() [][]byte {
-	return [][]byte{[]byte("I300455BC4308531")}
+func GetAttendanceForTestingKey(stub *shim.MockStub) [][]byte {
+	// return [][]byte{[]byte("sfadmin358801")}
+	return [][]byte{[]byte("000")} // stub.GetTxID()
 }
 
 // ============================================================================================================================
@@ -75,9 +76,10 @@ func GetAttendanceForTestingKey() [][]byte {
 func ConvertBytesToAttendanceAsBytes(attendanceAsBytes [][]byte) []byte {
 	var attendance Attendance
 	attendance.ID = string(attendanceAsBytes[0])
-	attendance.ParticipantID = string(attendanceAsBytes[1])
-	attendance.SessionID = string(attendanceAsBytes[2])
-	attendance.SessionCode = string(attendanceAsBytes[3])
+	attendance.Cust_attendance_externalCode = string(attendanceAsBytes[1])
+	attendance.ExternalCode = string(attendanceAsBytes[2])
+	attendance.Cust_session_id = string(attendanceAsBytes[3])
+	attendance.Cust_session_code = string(attendanceAsBytes[4])
 	bagJSON, err := json.Marshal(attendance)
 	if err != nil {
 		fmt.Println("Error converting an Attendance record to JSON")

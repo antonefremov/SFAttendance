@@ -37,6 +37,8 @@ func (s *SmartContract) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 		return recordAttendance(stub, args)
 	} else if function == "verifyAttendance" { // verify if attendance exists
 		return verifyAttendance(stub, args)
+	} else if function == "readAttendance" { // get a particular attendance record by its transaction key
+		return readAttendance(stub, args)
 	}
 
 	return shim.Error("Invalid Smart Contract function name")
