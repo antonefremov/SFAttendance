@@ -17,6 +17,7 @@ type Attendance struct {
 	Cust_session_id              string    `json:"cust_session_id"`              // Cust Session Id
 	Cust_session_code            string    `json:"cust_session_code"`            // Cust Session Code
 	LastModifiedBy               string    `json:"lastModifiedBy"`               // Last Modified By (Participant)
+	ExternalName                 string    `json:"externalName"`                 // Participant's Full Name
 	LastModifiedDateTime         time.Time `json:"lastModifiedDateTime"`         // Last Modified Time
 	// DateTime	  string ???
 	// Confirmation string `json:"confirmation"` // Confirmation response sent as a bar code or a url link ???
@@ -28,8 +29,8 @@ type Attendance struct {
 func recordAttendance(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	var err error
 
-	if len(args) != 5 {
-		return shim.Error("Incorrect number of arguments. Expecting exactly 5 arguments")
+	if len(args) != 6 {
+		return shim.Error("Incorrect number of arguments. Expecting exactly 6 arguments")
 	}
 
 	var attendance Attendance
@@ -38,6 +39,7 @@ func recordAttendance(stub shim.ChaincodeStubInterface, args []string) peer.Resp
 	attendance.Cust_session_id = args[2]
 	attendance.Cust_session_code = args[3]
 	attendance.LastModifiedBy = args[4]
+	attendance.ExternalName = args[5]
 	attendance.LastModifiedDateTime = time.Now()
 	attendance.ID = stub.GetTxID() // attendance.Cust_attendance_externalCode + attendance.ExternalCode
 

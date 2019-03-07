@@ -58,11 +58,12 @@ func Invoke(test *testing.T, stub *shim.MockStub, function string, args [][]byte
 func GetAttendaceForTesting() [][]byte {
 	return [][]byte{
 		// []byte("I300455BC4308531"), // ID
-		[]byte("sfadmin"),  // Cust_attendance_externalCode
-		[]byte("358801"),   // ExternalCode
-		[]byte("001"),      // Cust_session_id
-		[]byte("abcd1234"), // Cust_session_code
-		[]byte("sfadmin")}  // LastModifiedBy
+		[]byte("sfadmin"),   // Cust_attendance_externalCode
+		[]byte("358801"),    // ExternalCode
+		[]byte("001"),       // Cust_session_id
+		[]byte("abcd1234"),  // Cust_session_code
+		[]byte("sfadmin"),   // LastModifiedBy
+		[]byte("johnsmith")} // Attendee's full name
 }
 
 func GetAttendanceForTestingKey(stub *shim.MockStub) [][]byte {
@@ -80,6 +81,7 @@ func ConvertBytesToAttendanceAsBytes(attendanceAsBytes [][]byte) []byte {
 	attendance.ExternalCode = string(attendanceAsBytes[2])
 	attendance.Cust_session_id = string(attendanceAsBytes[3])
 	attendance.Cust_session_code = string(attendanceAsBytes[4])
+	attendance.ExternalName = string(attendanceAsBytes[5])
 	bagJSON, err := json.Marshal(attendance)
 	if err != nil {
 		fmt.Println("Error converting an Attendance record to JSON")
